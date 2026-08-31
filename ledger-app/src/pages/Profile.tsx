@@ -115,7 +115,7 @@ export default function Profile() {
   const handleLogout = () => {
     resetData()
     setLogoutOpen(false)
-    toast('已恢复为演示数据', 'success')
+    toast('已清空所有本地数据', 'success')
   }
 
   const menuGroupClass = 'overflow-hidden rounded-2xl border border-border bg-card shadow-sm'
@@ -133,10 +133,12 @@ export default function Profile() {
           className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-medium text-primary-foreground"
           aria-hidden="true"
         >
-          {profile.name.charAt(0).toUpperCase() || 'A'}
+          {profile.name ? profile.name.charAt(0).toUpperCase() : <User size={28} />}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-semibold text-card-foreground">{profile.name}</p>
+          <p className="truncate text-lg font-semibold text-card-foreground">
+            {profile.name || '未设置昵称'}
+          </p>
           <p className="truncate text-sm text-muted-foreground">{profile.email || '未设置邮箱'}</p>
         </div>
         <button
@@ -317,7 +319,7 @@ export default function Profile() {
         onClick={() => setLogoutOpen(true)}
         className="w-full py-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        退出登录
+        清空本地数据
       </button>
 
       {/* ===== Modals ===== */}
@@ -400,9 +402,9 @@ export default function Profile() {
         </div>
       </Modal>
 
-      <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="退出登录">
+      <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="清空本地数据">
         <p className="text-sm text-muted-foreground">
-          将清除本地记录并恢复演示数据（当前浏览器），确定退出吗？
+          将清除交易、个人资料与预算设置（当前浏览器），该操作不可撤销，确定继续吗？
         </p>
         <div className="mt-5 flex gap-3">
           <button

@@ -39,7 +39,7 @@ export default function Dashboard() {
         <div>
           <p className="text-sm text-muted-foreground">{todayHeaderLabel()}</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {greeting()}，{profile.name}
+            {profile.name ? `${greeting()}，${profile.name}` : `${greeting()}！开始你的第一笔记账吧`}
           </h1>
         </div>
         <Link

@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { createSeedTransactions } from '@/lib/seed'
 import { uid } from '@/lib/utils'
 import type { Profile, ThemeMode, Transaction } from '@/lib/types'
 
@@ -15,15 +14,16 @@ interface LedgerState {
   setBudget: (budget: number) => void
   setProfile: (patch: Partial<Profile>) => void
   setTheme: (theme: ThemeMode) => void
+  /** 清空全部数据（交易 / 资料 / 预算），仅保留主题偏好 */
   resetData: () => void
 }
 
 export const useLedgerStore = create<LedgerState>()(
   persist(
     (set) => ({
-      transactions: createSeedTransactions(),
-      profile: { name: 'Alex', email: 'alex@example.com' },
-      budget: 8000,
+      transactions: [],
+      profile: { name: '', email: '' },
+      budget: 0,
       theme: 'system',
 
       addTransaction: (t) =>
@@ -44,20 +44,37 @@ export const useLedgerStore = create<LedgerState>()(
 
       resetData: () =>
         set({
-          transactions: createSeedTransactions(),
-          profile: { name: 'Alex', email: 'alex@example.com' },
-          budget: 8000,
+          transactions: [],
+          profile: { name: '', email: '' },
+          budget: 0,
         }),
     }),
     {
       name: 'pinguo-ledger',
-      version: 1,
+      version: 2,
       partialize: (state) => ({
         transactions: state.transactions,
         profile: state.profile,
         budget: state.budget,
         theme: state.theme,
       }),
+      /**
+       * Migrate persisted data to the "clean slate" shape:
+       * - v1 (seeded): drop the demo transactions & demo profile/budget
+       * - unknown -> empty defaults
+       */
+      migrate: (persisted: unknown, version): Partial<LedgerState> => {
+        const obj = (persisted ?? {}) as Partial<LedgerState>
+        // Always strip any seed-era demo entries, regardless of version.
+        return {
+          transactions: [],
+          profile: { name: '', email: '' },
+          budget: 0,
+          theme: typeof obj.theme === 'string' ? (obj.theme as ThemeMode) : 'system',
+        }
+        // Note: version already guaranteed >=1 by zustand/migrate signature; keep for future.
+        void version
+      },
     },
   ),
 )
